@@ -1,0 +1,153 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb07ae89-3a36-4b09-baad-bba768f7096c",
+      "name": "Telegram Trigger",
+      "webhookId": "3be8f756-75a3-4512-b39e-99d1f2214b94",
+      "credentials": {
+        "telegramApi": {
+          "id": "U2qy0oTMf7v3czYg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90397bbc-8679-4193-a2a4-8e89559e1bf7",
+              "name": "business_info",
+              "value": "  Sunrise Dental Clinic. Open Monday-Saturday, 10am-7pm, closed Sundays. Services: teeth cleaning ₹500, root canal ₹3000-5000, tooth extraction ₹800-1500. Located near MG Road, Bengaluru. Booking: call to schedule, no online booking yet.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "091fc639-5a16-47bd-9612-33491892d106",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=AIzaSyDuzwayWVYg4Z1VkMMcM8GoDOWAaBFWzRQ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=     {\n       \"contents\": [{\n         \"parts\": [{\n           \"text\": \"You are a helpful assistant for this business: {{ $json.business_info }}. Answer the customer's question using ONLY this information, be concise and friendly. Customer question: {{ $('Telegram Trigger').item.json.message.text }}\"\n         }]\n       }]\n     }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "fccd8470-76e9-44ab-b6e3-f03bc9aa74d6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
+        "additionalFields": {
+          "disable_web_page_preview": true,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "aecbf5e0-32be-473e-9242-a55ffb350df9",
+      "name": "Send a text message",
+      "webhookId": "725cb96d-4034-4cc2-9e9c-85f1d9611c70",
+      "credentials": {
+        "telegramApi": {
+          "id": "UidXvO2kQsUf4KlA",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4bcf3644-f01e-488c-bff8-c77113cc21c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4705c234c83d1e77c1d31ec5bffe1672f15121de51437d103da67a76b9f1dfe1"
+  },
+  "nodeGroups": [],
+  "id": "yTeObclaXEcYhxvZ",
+  "tags": []
+}
